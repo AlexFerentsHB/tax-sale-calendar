@@ -21,3 +21,48 @@
 - Fonts: Space Grotesk (display) + Inter (body) via next/font.
 - Motion primitives (page transition, stagger, item) + reduced-motion support.
 - Header (sticky glass, nav, refresh, theme) + footer. TanStack Query + IndexedDB persistence.
+
+## 2026-09-15 — Phase 3 (county directory)
+
+- Hero with live stats (counties / upcoming auctions / states), instant search, state selector
+  defaulting to Texas, and a responsive card grid with upcoming-auction badges.
+- Hover/focus prefetches the county detail into the query cache.
+
+## 2026-09-15 — Phase 4 (county detail pages)
+
+- `/county/[id]` prerendered for all 1493 counties via `generateStaticParams`.
+- Parsed key-facts grid, matched upcoming auctions, sanitized guide article, source link.
+- Article HTML is sanitized in the sync (scripts/handlers/javascript: stripped; only
+  YouTube iframes retained).
+
+## 2026-09-15 — Phase 5 (calendar & filters)
+
+- Upcoming auctions grouped by day, with type/state/county/date-range filters and a
+  shareable county URL param. ICS + CSV export of the filtered set.
+
+## 2026-09-15 — Phase 6 (resilience)
+
+- All data is committed under `public/data/`, so the site renders even if the source is down.
+- Empty states for no-search-results, no-counties, and no-auctions. County pages degrade to
+  metadata-only when a doc has no guide content.
+
+## 2026-09-15 — Phase 7 (test, polish, deploy)
+
+- ESLint + `tsc --noEmit` clean. Playwright pass: 24/25 checks green (the single non-pass is a
+  benign Chromium `compute-pressure` permissions warning, not app code).
+- Verified at 375 / 768 / 1440px with no horizontal overflow on directory, calendar, and county.
+- Deploy: created `AlexFerentsHB/tax-sale-calendar`, published `out/` to `gh-pages` with
+  `.nojekyll`, enabled Pages (legacy build). Live:
+  https://alexferentshb.github.io/tax-sale-calendar/
+- Pivot/decision: the local `better-sqlite3` staging store from the brief was replaced with a
+  JSON staging cache to avoid native-module build risk in an unattended run. Normalized output
+  is identical; artifacts are the same shape.
+- Decision: deploy to a NEW repo. The existing `alexferentshb.github.io` user-pages repo was
+  left untouched (off-limits — it is an existing site).
+
+### Known limitations
+
+- Content is a snapshot at sync time; re-run `npm run sync` to refresh.
+- County pages are keyed by the source document id (slugs are not unique across states).
+- The deployed site is public and republishes the source's county guide text; treat the repo
+  and Pages site as public.

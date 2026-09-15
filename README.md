@@ -4,6 +4,8 @@ A read-only directory and auction calendar for tax-sale investing: every county'
 rules on one page, and the upcoming tax deed / redeemable deed / tax lien auctions in one
 calendar.
 
+**Live:** https://alexferentshb.github.io/tax-sale-calendar/
+
 Data comes from the public WordPress REST endpoints of `vault.taxlienschool.com`
 (read-only GETs only) and is normalized into static JSON at sync time. The site has no
 runtime dependency on that source.
@@ -36,6 +38,16 @@ npm run build     # runs sync then next build; output in ./out/
 ```
 
 Deploy `./out/` to any static host (Vercel, Cloudflare Pages, Netlify, GitHub Pages).
+
+For a subpath host (this project is published at `/tax-sale-calendar/` on GitHub Pages),
+set the base path at build time:
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/tax-sale-calendar npm run build
+```
+
+then publish `./out/` to the `gh-pages` branch (include a `.nojekyll` file so `_next` is
+not stripped).
 
 ## Data model
 
