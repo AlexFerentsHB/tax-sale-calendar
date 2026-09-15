@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tax Sale.
 
-## Getting Started
+A read-only directory and auction calendar for tax-sale investing: every county's tax-sale
+rules on one page, and the upcoming tax deed / redeemable deed / tax lien auctions in one
+calendar.
 
-First, run the development server:
+Data comes from the public WordPress REST endpoints of `vault.taxlienschool.com`
+(read-only GETs only) and is normalized into static JSON at sync time. The site has no
+runtime dependency on that source.
+
+## Stack
+
+- **Next.js 16 (App Router) + TypeScript**, exported as a fully static site
+- **Tailwind CSS v4** + a small set of hand-rolled UI primitives
+- **Motion (framer-motion)** for transitions and list animations
+- **TanStack Query** with **IndexedDB persistence** for client-side caching and offline revisits
+- **`scripts/sync.mjs`** — zero-dependency Node pipeline (fetch → normalize → emit JSON)
+
+## Local setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+corepack disable  # if you hit "UNSUPPORTED ENGINE" on npm engine warnings
+npm install
+npm run sync      # pulls the docs tree + upcoming events into public/data/
+npm run dev       # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To refresh the data: `npm run sync` (cached in `./cache/`, incremental on re-run), then
+`npm run build` to publish a new static export. The in-app refresh button re-fetches the
+deployed artifacts.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build & deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build     # runs sync then next build; output in ./out/
+```
 
-## Learn More
+Deploy `./out/` to any static host (Vercel, Cloudflare Pages, Netlify, GitHub Pages).
 
-To learn more about Next.js, take a look at the following resources:
+## Data model
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The WordPress source exposes two open REST APIs:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **County docs** — `GET /wp-json/wp/v2/docs?parent=<id>` — a tree of
+  program → state → county. Each county doc's `content.rendered` includes a fact table
+  (sale type, sale date, redemption period, interest rate, bid procedure, deposit,
+  registration, location, contact) that is parsed into structured cards.
+- **Events** — `GET /wp-json/tribe/events/v1/events?start_date=<now>` — upcoming auctions.
+  County and state are parsed from each event title (e.g. `Harris County TX – Redeemable
+  Deed Auction`) and matched to the county docs.
 
-## Deploy on Vercel
+Artifacts written to `public/data/`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `manifest.json` — programs, states, counties (with upcoming-auction counts), event months
+- `events/<YYYY-MM>.json` — events split by month
+- `counties/<id>.json` — one file per county (facts + sanitized article HTML)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Additions to the source propagate via `npm run sync`. The pipeline is incremental:
+county docs are re-fetched only when their `modified` date changes.
+
+## Limitations
+
+- Data is a snapshot of the source at sync time; always confirm details with the county.
+- County pages are keyed by the source's document id; slugs are not unique across states.
+- Some counties have no guide content or no upcoming auctions yet, and render graceful
+  empty states.

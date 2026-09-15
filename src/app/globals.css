@@ -1,26 +1,133 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f6f5f2;
+  --panel: #ffffff;
+  --line: rgba(12, 12, 22, 0.09);
+  --ink: #101014;
+  --muted: #5c5c68;
+  --panel2: #f0efeb;
+  --glow: rgba(245, 158, 11, 0.14);
+}
+
+.dark {
+  --bg: #08080d;
+  --panel: #0e0e17;
+  --line: rgba(255, 255, 255, 0.09);
+  --ink: #f4f4f7;
+  --muted: #8b8b99;
+  --panel2: #14141f;
+  --glow: rgba(245, 158, 11, 0.10);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(128, 128, 140, 0.4) transparent;
+}
+
+/* county article prose */
+.prose-article h2 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 1.6rem 0 0.6rem;
+}
+.prose-article h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 650;
+  margin: 1.3rem 0 0.5rem;
+}
+.prose-article p {
+  margin: 0.75rem 0;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.prose-article strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+.prose-article ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.prose-article ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.prose-article li {
+  margin: 0.3rem 0;
+}
+.prose-article a {
+  color: #f59e0b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-article blockquote {
+  border-left: 3px solid rgba(245, 158, 11, 0.6);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.prose-article img {
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+.prose-article .has-fixed-layout {
+  display: none; /* fact table is rendered separately as cards */
+}
+.prose-article .video-container,
+.prose-article iframe {
+  border-radius: 14px;
+  margin: 1.25rem 0;
+}
+.prose-article iframe {
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
